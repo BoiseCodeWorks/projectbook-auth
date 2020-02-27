@@ -20,14 +20,14 @@ export class Auth0Provider {
     this.isAuthenticated = await this.auth0Client.isAuthenticated();
 
     if (this.isAuthenticated) {
-      this.AUTHENTICATED();
+      await this.AUTHENTICATED();
       return;
     }
     const query = window.location.search;
     if (query.includes("code=") && query.includes("state=")) {
       // Process the login state
       await this.auth0Client.handleRedirectCallback();
-      this.AUTHENTICATED();
+      await this.AUTHENTICATED();
 
       // Use replaceState to redirect the user away and remove the querystring parameters
       window.history.replaceState({}, document.title, "/");
@@ -35,8 +35,12 @@ export class Auth0Provider {
   }
 
   static async login() {
-    await this.auth0Client.loginWithPopup();
-    this.AUTHENTICATED();
+    try {
+      await this.auth0Client.loginWithPopup();
+      await this.AUTHENTICATED();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   /** Logs the user out and removes their session on the authorization server */
